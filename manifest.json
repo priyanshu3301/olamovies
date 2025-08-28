@@ -35,12 +35,6 @@
       "all_frames": true,
       "run_at": "document_end",
       "js": ["content.js"]
-    },
-    {
-      "matches": ["https://procinehub.com/*"],
-      "all_frames": true,
-      "run_at": "document_end",
-      "js": ["gpbypass.js"]
     }
   ],
 
@@ -58,6 +52,11 @@
         "id": "ruleset_1",
         "enabled": true,
         "path": "rules_1.json"
+      },
+      {
+        "id": "ruleset_2",
+        "enabled": true,
+        "path": "rules_2.json"
       }
     ]
   }
