@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Olamovies Shortner bypass",
   "description": "Bypass Olamovies shortner links",
-  "version": "1.0.9",
+  "version": "1.1.0",
 
   "icons": {
     "16": "image.png",
@@ -24,14 +24,16 @@
   ],
 
   "host_permissions": [
-    "https://olamovies.blog/*",
+    "https://olamovies.watch/*",
     "https://link.get2short.com/*",
-    "https://procinehub.com/*"
+    "https://procinehub.com/*",
+    "*://*.timeurl.org/*",
+    "*://*.v2links.org/*"
   ],
 
   "content_scripts": [
     {
-      "matches": ["https://olamovies.blog/generate/*"],
+      "matches": ["https://olamovies.watch/generate/*"],
       "all_frames": true,
       "run_at": "document_end",
       "js": ["content.js"]
@@ -42,7 +44,7 @@
   "web_accessible_resources": [
     {
       "resources": ["inject.js"],
-      "matches": ["https://olamovies.blog/*"]
+      "matches": ["https://olamovies.watch/*"]
     }
   ],
 
@@ -57,6 +59,11 @@
         "id": "ruleset_2",
         "enabled": true,
         "path": "rules_2.json"
+      },
+      {
+        "id": "ruleset_3",
+        "enabled": true,
+        "path": "rules_3.json"
       }
     ]
   }

@@ -1,4 +1,5 @@
 async function hello() {
+  try {
     const decrypturl = await decryptData();
     showToast("Redirecting to: " + decrypturl,"success");
     replaceAdblockMessage(`
@@ -13,6 +14,9 @@ async function hello() {
     const response = await fetch(`https://short.sad282.workers.dev/?url=${decrypturl}`);
     const responseData = await response.text();
     location.href = responseData;
+  } catch (error) {
+    console.error("Error:", error);
+  }
 }
 
 function replaceAdblockMessage(newContent) {
