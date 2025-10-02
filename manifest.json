@@ -24,7 +24,7 @@
   ],
 
   "host_permissions": [
-    "https://olamovies.watch/*",
+    "https://olamovies.beer/*",
     "https://link.get2short.com/*",
     "https://procinehub.com/*",
     "*://*.timeurl.org/*",
@@ -33,7 +33,7 @@
 
   "content_scripts": [
     {
-      "matches": ["https://olamovies.watch/generate/*"],
+      "matches": ["https://olamovies.beer/generate/*"],
       "all_frames": true,
       "run_at": "document_end",
       "js": ["content.js"]
@@ -44,7 +44,7 @@
   "web_accessible_resources": [
     {
       "resources": ["inject.js"],
-      "matches": ["https://olamovies.watch/*"]
+      "matches": ["https://olamovies.beer/*"]
     }
   ],
 
