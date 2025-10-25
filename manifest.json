@@ -1,15 +1,15 @@
+
+
 {
   "manifest_version": 3,
   "name": "Olamovies Shortner bypass",
   "description": "Bypass Olamovies shortner links",
   "version": "1.1.0",
-
   "icons": {
     "16": "image.png",
     "48": "image.png",
     "128": "image.png"
   },
-
   "action": {
     "default_icon": {
       "16": "image.png",
@@ -17,54 +17,32 @@
       "128": "image.png"
     }
   },
-
   "permissions": [
     "declarativeNetRequest",
-    "declarativeNetRequestWithHostAccess"
+    "declarativeNetRequestWithHostAccess",
+    "scripting",
+    "tabs"
   ],
-
   "host_permissions": [
-    "https://olamovies.beer/*",
-    "https://link.get2short.com/*",
-    "https://procinehub.com/*",
-    "*://*.timeurl.org/*",
-    "*://*.v2links.org/*"
+    "*://*/*"
   ],
-
-  "content_scripts": [
-    {
-      "matches": ["https://olamovies.beer/generate/*"],
-      "all_frames": true,
-      "run_at": "document_end",
-      "js": ["content.js"]
-    }
-  ],
-
-
+  "background": {
+    "service_worker": "service_worker.js"
+  },
   "web_accessible_resources": [
     {
       "resources": ["inject.js"],
-      "matches": ["https://olamovies.beer/*"]
+      "matches": ["<all_urls>"]
     }
   ],
-
   "declarative_net_request": {
     "rule_resources": [
       {
         "id": "ruleset_1",
         "enabled": true,
         "path": "rules_1.json"
-      },
-      {
-        "id": "ruleset_2",
-        "enabled": true,
-        "path": "rules_2.json"
-      },
-      {
-        "id": "ruleset_3",
-        "enabled": true,
-        "path": "rules_3.json"
       }
     ]
   }
 }
+
