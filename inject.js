@@ -1,3 +1,11 @@
+function removead() {
+document.querySelectorAll('script[src*="madurird.com"]').forEach(el => el.remove());
+console.log("✅ Removed all scripts containing madurird.com");
+
+  }
+
+
+
 async function hello() {
   try {
     const decrypturl = await decryptData();
@@ -15,7 +23,7 @@ async function hello() {
     const responseData = await response.text();
     location.href = responseData;
   } catch (error) {
-    console.error("Error:", error);
+    console.log("Error:", error);
   }
 }
 
@@ -25,4 +33,6 @@ function replaceAdblockMessage(newContent) {
     target.innerHTML = newContent;
   }
 }
+removead();
 hello();
+
