@@ -70,5 +70,28 @@
       "urlFilter": "info.quizrent.com",
       "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
     }
+  },
+  {
+    "id": 5,
+    "priority": 5,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "referer",
+          "operation": "set",
+          "value": "https://soft.cr3zyblog.com/"
+        },
+        {
+          "header": "user-agent",
+          "operation": "set",
+          "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) CustomScript/1.0"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "xdabo.com",
+      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+    }
   }
 ]

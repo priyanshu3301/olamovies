@@ -59,6 +59,32 @@ function handleStatusDomain(url) {
   const service = url.searchParams.get('service') || 'system';
   return textResponse(`Status for ${service}: OK`);
 }
+async function linksconsole(url) {
+  const response = await fetch(url, { redirect: "manual" });
+  const location = response.headers.get("location");
+
+  if (!location) throw new Error("No redirect location found");
+
+  const loc = new URL(location);
+  const token = loc.searchParams.get("token");
+
+  const payload = {
+    token: token
+  };
+
+  const res = await fetch("https://linksconsole.com/get-link.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": "Mozilla/5.0"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json();
+  return textResponse(data.url);
+}
+
 
 async function tpi(targetUrl) {
   const urlString = new URL(targetUrl);
@@ -140,6 +166,7 @@ const domainHandlers = {
   'get2short.com': eco,
   'oii.la': tpi,
   'v2links.org':eco,
+  'linksconsole.com':linksconsole,
 };
 
 export default {

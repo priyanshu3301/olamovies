@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waiting...</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+  <div class="text-center p-8 bg-gray-800 rounded-xl shadow-2xl">
+    <h1 class="text-4xl md:text-5xl font-bold text-red-400 mb-4">We are bypassing the link, please wait...</h1>
+    <p id="message" class="text-2xl font-bold text-cyan-400"></p>
+    <p class="mt-4 text-lg text-gray-300">We couldn’t get the final destination. Retrying shortly...</p>
+  </div>
+
+  <script>
+    const messageElement = document.getElementById('message');
+    const params = new URLSearchParams(location.search);
+    const target = params.get("target");
+
+    let countdown = 70;
+
+    function updateCountdown() {
+      if (countdown > 0) {
+        messageElement.textContent = `Redirecting in ${countdown} second${countdown === 1 ? '' : 's'}...`;
+        countdown--;
+        setTimeout(updateCountdown, 1000);
+      } else {
+        if (target) {
+          window.location.href = target;
+        } else {
+          messageElement.textContent = "Error: No redirect link found.";
+        }
+      }
+    }
+
+    // Start the countdown immediately
+    updateCountdown();
+  </script>
+</body>
+</html>
