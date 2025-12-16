@@ -93,5 +93,23 @@
       "urlFilter": "xdabo.com",
       "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
     }
+  },
+  {
+    "id": 6,
+    "priority": 6,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "referer",
+          "operation": "set",
+          "value": "https://yjiur.xyz/"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "linkjust.com",
+      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+    }
   }
 ]
