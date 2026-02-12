@@ -1,6 +1,15 @@
 function removead() {
-document.querySelectorAll('script[src*="madurird.com"]').forEach(el => el.remove());
-console.log("✅ Removed all scripts containing madurird.com");
+const originalFetch = window.fetch;
+
+window.fetch = function(url, options) {
+    if (typeof url === "string" && url.includes("madurird.com")) {
+        console.warn("Blocked request to:", url);
+        return Promise.reject("Blocked domain");
+    }
+    return originalFetch(url, options);
+};
+
+console.log("✅ Removed madurird.com");
 
   }
 
