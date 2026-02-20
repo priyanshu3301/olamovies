@@ -1,17 +1,17 @@
 function removead() {
-const originalFetch = window.fetch;
+  const originalOpen = window.open;
 
-window.fetch = function(url, options) {
-    if (typeof url === "string" && url.includes("madurird.com")) {
-        console.warn("Blocked request to:", url);
-        return Promise.reject("Blocked domain");
-    }
-    return originalFetch(url, options);
+  window.open = function(url, target, features) {
+      if (url.includes("madurird.com")) {
+          console.log("Blocked suspicious popup:", url);
+          return null;
+      }
+
+      return originalOpen.call(this, url, target, features);
+  };
+  console.log("✅ Removed madurird.com");
 };
 
-console.log("✅ Removed madurird.com");
-
-  }
 
 
 
