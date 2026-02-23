@@ -1,19 +1,7 @@
 function removead() {
-  const originalOpen = window.open;
-
-  window.open = function(url, target, features) {
-      if (url.includes("madurird.com")) {
-          console.log("Blocked suspicious popup:", url);
-          return null;
-      }
-
-      return originalOpen.call(this, url, target, features);
-  };
+  document.querySelector("html > div")?.remove();
   console.log("✅ Removed madurird.com");
 };
-
-
-
 
 async function hello() {
   try {
