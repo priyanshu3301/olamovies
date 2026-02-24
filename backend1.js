@@ -87,41 +87,29 @@ async function linksconsole(url) {
 
 
 async function tpi(targetUrl) {
-  const urlString = new URL(targetUrl);
-
   try {
-
-    const resp = await fetch(targetUrl);
-    const htmlText = await resp.text();
-
-    const fields = ["token", "url", "c_d", "c_t", "alias"];
-    const formData = {};
-    for (const field of fields) {
-      formData[field] = extractInputValue(field, htmlText);
-    }
-
-    const resp2 = await fetch(targetUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-      },
-      body: new URLSearchParams(formData).toString()
+    // Request only the last 50,000 bytes
+    const resp = await fetch(targetUrl, {
+      headers: { 'Range': 'bytes=-50000' } 
     });
-    const htmlText2 = await resp2.text();
 
-    const ad_form_data = extractInputValue("ad_form_data", htmlText2);
-    if (!ad_form_data) {
-      return textResponse('Could not extract final ad_form_data.', 500);
+    const text = await resp.text();
+    
+    // Look for the marker aHR0cHM directly in the text
+    const marker = "aHR0cHM";
+    const markerIndex = text.indexOf(marker);
+    
+    if (markerIndex !== -1) {
+      // Find the end of the token (the next quote mark)
+      const sub = text.substring(markerIndex);
+      const tokenEnd = sub.indexOf('"');
+      const encodedPart = sub.substring(0, tokenEnd);
+      
+      return textResponse(atob(decodeURIComponent(encodedPart)));
     }
-
-    const encodedData = encodeURIComponent(String(ad_form_data));
-    const finalWorkerUrl = `https://lively-bird-e78f.conifnun.workers.dev/?url=${urlString.origin}/links/go&ad_form_data=${encodedData}`;
-
-    return textResponse(finalWorkerUrl);
-
-  } catch (error) {
-    return textResponse(`An error occurred during the bypass process: ${error.message}`, 500);
+  } catch (e) {
+    // Fallback to the streaming method if Range is not supported
+    return textResponse(e); 
   }
 }
 
