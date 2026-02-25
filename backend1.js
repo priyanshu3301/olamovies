@@ -86,6 +86,12 @@ async function linksconsole(url) {
 }
 
 
+// Helper for API response format
+function textResponse(content) {
+    return content;
+}
+
+
 async function tpi(targetUrl) {
   try {
     // Request only the last 50,000 bytes
@@ -155,6 +161,7 @@ const domainHandlers = {
   'oii.la': tpi,
   'v2links.org':eco,
   'linksconsole.com':linksconsole,
+  'shrinkme.click': eco,
 };
 
 export default {
