@@ -1,5 +1,3 @@
-
-
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   // Only run when the tab is loading and has a URL
   if (changeInfo.status !== "loading" || !tab.url) return;
@@ -15,7 +13,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       hostname.includes(".olamovies.")
     ) {
       await chrome.scripting.executeScript({
-        target: { tabId, allFrames: true },
+        target: { tabId, allFrames: false },
         files: ["content.js"]
       });
       return; // Stop further processing if it's an olamovies link
