@@ -4,50 +4,605 @@
 
   const originalFetch = window.fetch;
 
-  window.fetch = async function (...args) {
-    const request = args[0];
-    const url = request instanceof Request ? request.url : String(request);
+  // ============================================================
+  // CONFIG
+  // ============================================================
 
-    // 1. Quick check: If it's not our target, don't interfere at all
-    if (!url.includes('/api/omd')) {
-      return originalFetch.apply(this, args);
-    }
+  let url1 = null;
+  let url2 = "https://loanbixby.com";
+  let url3 = "https://srnky.com/links/go";
 
-    // 2. Proceed with the original request
-    const response = await originalFetch.apply(this, args);
 
-    // 3. Logic for intercepted request
-    try {
-      const clonedRes = response.clone();
-      const data = await clonedRes.json();
+  // ============================================================
+  // COUNTDOWN
+  // ============================================================
 
-      if (data?.shortener && data?.isFound) {
-        // Fetch the resolved link from your worker
-        const workerUrl = `https://short.sad282.workers.dev/?url=${encodeURIComponent(data.shortener)}`;
-        const shortRes = await originalFetch(workerUrl);
-        const resolvedLink = await shortRes.text();
+  function startCountdown() {
+    return new Promise((resolve) => {
 
-        data.shortener = resolvedLink;
+      const button = document.querySelector(".visit-btn");
 
-        // 4. Reconstruct headers carefully
-        const newHeaders = new Headers(response.headers);
-        newHeaders.delete("content-length"); // Allow browser to recalculate length
-        newHeaders.set("content-type", "application/json");
-
-        return new Response(JSON.stringify(data), {
-          status: response.status,
-          statusText: response.statusText,
-          headers: newHeaders
-        });
+      if (!button) {
+        console.warn("⚠️ .visit-btn not found");
+        resolve();
+        return;
       }
-    } catch (err) {
-      console.error("⚠️ OMD Interceptor Error:", err);
-      // Fallback: return original response so the site doesn't break
-      return response;
+
+      let remaining = 15;
+
+      button.disabled = true;
+      button.style.cursor = "not-allowed";
+      button.style.opacity = "0.7";
+
+      button.innerHTML =
+        `Please wait ${remaining}s`;
+
+      const timer = setInterval(() => {
+
+        remaining--;
+
+        if (remaining > 0) {
+
+          button.innerHTML =
+            `Please wait ${remaining}s`;
+
+        } else {
+
+          clearInterval(timer);
+
+          button.disabled = false;
+          button.style.cursor = "pointer";
+          button.style.opacity = "1";
+
+          button.innerHTML = `
+                        srnky.com
+                        <span class="inline-flex">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M15 3h6v6"></path>
+                                <path d="M10 14 21 3"></path>
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            </svg>
+                        </span>
+                    `;
+
+          console.log("✅ Countdown finished");
+
+          resolve();
+        }
+
+      }, 1000);
+    });
+  }
+
+
+  // ============================================================
+  // EXTRACT HIDDEN INPUTS
+  // ============================================================
+
+  function extractHiddenInputs(html) {
+
+    const formData = new URLSearchParams();
+
+    const inputRegex =
+      /<input\b[^>]*type=["']hidden["'][^>]*>/gi;
+
+    const inputs =
+      html.match(inputRegex) || [];
+
+
+    for (const input of inputs) {
+
+      const nameMatch =
+        input.match(
+          /\bname=["']([^"']*)["']/i
+        );
+
+      if (!nameMatch) continue;
+
+
+      const valueMatch =
+        input.match(
+          /\bvalue=["']([^"']*)["']/i
+        );
+
+
+      const name =
+        nameMatch[1];
+
+      const value =
+        valueMatch
+          ? valueMatch[1]
+          : "";
+
+
+      formData.append(
+        name,
+        value
+      );
     }
 
-    return response;
-  };
+    return formData;
+  }
 
-  console.log("🚀 Interceptor optimized and active");
+
+  // ============================================================
+  // EXTRACT ad_form_data
+  // ============================================================
+
+  function extractAdFormData(html) {
+
+    // input[name="ad_form_data"]
+    let match =
+      html.match(
+        /<input\b[^>]*name=["']ad_form_data["'][^>]*value=["']([^"']*)["']/i
+      );
+
+
+    if (match) {
+      return match[1];
+    }
+
+
+    // textarea[name="ad_form_data"]
+    match =
+      html.match(
+        /<textarea\b[^>]*name=["']ad_form_data["'][^>]*>([\s\S]*?)<\/textarea>/i
+      );
+
+
+    if (match) {
+      return match[1].trim();
+    }
+
+
+    return null;
+  }
+
+
+  // ============================================================
+  // SHORTENER PROCESS
+  //
+  // GET url1
+  //     ↓
+  // POST url1
+  //     ↓
+  // extract ad_form_data
+  //     ↓
+  // wait for countdown
+  //     ↓
+  // POST url3
+  //     ↓
+  // resolvedLink
+  // ============================================================
+
+  async function resolveShortener(countdownPromise) {
+
+    console.log("🔵 Starting shortener process");
+
+
+    // --------------------------------------------------------
+    // 1. GET url1
+    // --------------------------------------------------------
+
+    console.log("GET:", url1);
+
+    const getResponse =
+      await originalFetch(url1, {
+        method: "GET"
+      });
+
+
+    if (!getResponse.ok) {
+
+      throw new Error(
+        `GET failed: ${getResponse.status}`
+      );
+    }
+
+
+    const html =
+      await getResponse.text();
+
+
+    // --------------------------------------------------------
+    // 2. Extract hidden fields
+    // --------------------------------------------------------
+
+    const formData =
+      extractHiddenInputs(html);
+
+
+    console.log(
+      "Extracted values:",
+      Object.fromEntries(formData)
+    );
+
+
+    // --------------------------------------------------------
+    // 3. POST url1
+    // --------------------------------------------------------
+
+    console.log("POST:", url1);
+
+    const postResponse =
+      await originalFetch(url1, {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/x-www-form-urlencoded",
+
+          "Referer":
+            url2
+        },
+
+        body:
+          formData.toString()
+      });
+
+
+    if (!postResponse.ok) {
+
+      throw new Error(
+        `POST failed: ${postResponse.status}`
+      );
+    }
+
+
+    const postHtml =
+      await postResponse.text();
+
+
+    // --------------------------------------------------------
+    // 4. Extract ad_form_data
+    // --------------------------------------------------------
+
+    const adFormData =
+      extractAdFormData(postHtml);
+
+
+    if (!adFormData) {
+
+      throw new Error(
+        "ad_form_data not found"
+      );
+    }
+
+
+    console.log(
+      "✅ ad_form_data extracted"
+    );
+
+
+    // --------------------------------------------------------
+    // 5. Wait for countdown
+    // --------------------------------------------------------
+
+    console.log(
+      "⏳ Waiting for countdown..."
+    );
+
+    await countdownPromise;
+
+
+    console.log(
+      "✅ Countdown completed"
+    );
+
+
+    // --------------------------------------------------------
+    // 6. Final POST → url3
+    // --------------------------------------------------------
+
+    const finalForm =
+      new URLSearchParams();
+
+
+    finalForm.append(
+      "_method",
+      "POST"
+    );
+
+
+    finalForm.append(
+      "ad_form_data",
+      adFormData
+    );
+
+
+    console.log(
+      "POST:",
+      url3
+    );
+
+
+    const finalResponse =
+      await originalFetch(
+        url3,
+        {
+
+          method: "POST",
+
+          headers: {
+
+            "Accept":
+              "application/json, text/javascript, */*; q=0.01",
+
+            "Content-Type":
+              "application/x-www-form-urlencoded; charset=UTF-8",
+
+            "X-Requested-With":
+              "XMLHttpRequest"
+
+          },
+
+          body:
+            finalForm.toString()
+        }
+      );
+
+
+    const finalText =
+      await finalResponse.text();
+
+
+    console.log(
+      "Final response:",
+      finalText
+    );
+
+
+    // --------------------------------------------------------
+    // 7. Parse final response
+    // --------------------------------------------------------
+
+    let result;
+
+    try {
+
+      result =
+        JSON.parse(finalText);
+
+    } catch {
+
+      throw new Error(
+        "Final response is not valid JSON"
+      );
+    }
+
+
+    if (
+      result.status !== "success" ||
+      !result.url
+    ) {
+
+      throw new Error(
+        "Shortener request failed"
+      );
+    }
+
+
+    console.log(
+      "🎯 Resolved URL:",
+      result.url
+    );
+
+
+    return result.url;
+  }
+
+
+  // ============================================================
+  // FETCH INTERCEPTOR
+  // ============================================================
+
+  window.fetch =
+    async function (...args) {
+
+      const request =
+        args[0];
+
+
+      const requestUrl =
+        request instanceof Request
+          ? request.url
+          : String(request);
+
+
+      // ----------------------------------------------------
+      // Ignore requests other than /api/generate
+      // ----------------------------------------------------
+
+      if (
+        !requestUrl.includes(
+          "/api/generate"
+        )
+      ) {
+
+        return originalFetch.apply(
+          this,
+          args
+        );
+      }
+
+
+      console.log(
+        "🎯 /api/generate intercepted"
+      );
+
+
+      // ====================================================
+      // 1. MAKE ORIGINAL REQUEST
+      // ====================================================
+
+      const response =
+        await originalFetch.apply(
+          this,
+          args
+        );
+
+
+      // ====================================================
+      // 2. INSPECT RESPONSE
+      // ====================================================
+
+      try {
+
+        const clonedResponse =
+          response.clone();
+
+
+        const data =
+          await clonedResponse.json();
+
+
+        console.log(
+          "📦 /api/generate response:",
+          data
+        );
+
+
+        // =================================================
+        // 3. CHECK CONDITIONS
+        //
+        // Only run the process when:
+        //
+        // data.isFound === true
+        // AND
+        // data.shortener === url1
+        // =================================================
+
+        if (data?.isFound === true && data?.shortenedShortener === "srnky.com") {
+
+          console.log(
+            "🎯 Target shortener detected"
+          );
+
+          url1 = data?.shortener;
+
+
+          // =============================================
+          // Start countdown
+          // =============================================
+
+          const countdownPromise =
+            startCountdown();
+
+
+          // =============================================
+          // Start GET → POST immediately
+          //
+          // This runs while countdown is running.
+          // =============================================
+
+          const resolvedLinkPromise =
+            resolveShortener(
+              countdownPromise
+            );
+
+
+          // =============================================
+          // Wait for the entire process
+          // =============================================
+
+          const resolvedLink =
+            await resolvedLinkPromise;
+
+
+          console.log(
+            "✅ Resolved link:",
+            resolvedLink
+          );
+
+
+          // =============================================
+          // Replace shortener
+          // =============================================
+
+          data.shortener =
+            resolvedLink;
+
+          data.shortenedShortener = "Bypassed";
+
+
+          // =============================================
+          // Rebuild response
+          // =============================================
+
+          const newHeaders =
+            new Headers(
+              response.headers
+            );
+
+
+          newHeaders.delete(
+            "content-length"
+          );
+
+
+          newHeaders.set(
+            "content-type",
+            "application/json"
+          );
+
+
+          return new Response(
+            JSON.stringify(data),
+            {
+
+              status:
+                response.status,
+
+              statusText:
+                response.statusText,
+
+              headers:
+                newHeaders
+            }
+          );
+        }
+
+
+        // =================================================
+        // Condition didn't match
+        // =================================================
+
+        console.log(
+          "ℹ️ Shortener does not match url1. Returning original response."
+        );
+
+
+        return response;
+
+
+      } catch (error) {
+
+        console.error(
+          "⚠️ Interceptor error:",
+          error
+        );
+
+
+        // Never break the website if our
+        // interception logic fails.
+        return response;
+      }
+    };
+
+
+  console.log(
+    "🚀 OMD interceptor active"
+  );
+
 })();

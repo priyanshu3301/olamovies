@@ -24,3 +24,42 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     console.error("Error in onUpdated listener:", e);
   }
 });
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type !== "PROXY_FETCH") {
+    return;
+  }
+
+  (async () => {
+    try {
+      const response = await fetch(message.url, {
+        method: message.options?.method || "GET",
+        headers: message.options?.headers || {},
+        body: message.options?.body,
+        credentials: message.options?.credentials || "include",
+        redirect: message.options?.redirect || "follow"
+      });
+
+      const text = await response.text();
+
+      sendResponse({
+        success: true,
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        body: text
+      });
+
+    } catch (error) {
+
+      console.error("Proxy fetch error:", error);
+
+      sendResponse({
+        success: false,
+        error: error.message
+      });
+    }
+  })();
+
+  return true;
+});

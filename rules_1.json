@@ -14,7 +14,11 @@
     },
     "condition": {
       "urlFilter": "link.get2short.com",
-      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "xmlhttprequest"
+      ]
     }
   },
   {
@@ -32,7 +36,11 @@
     },
     "condition": {
       "urlFilter": "timeurl.org",
-      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "xmlhttprequest"
+      ]
     }
   },
   {
@@ -50,7 +58,11 @@
     },
     "condition": {
       "urlFilter": "v2links.org",
-      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "xmlhttprequest"
+      ]
     }
   },
   {
@@ -68,7 +80,11 @@
     },
     "condition": {
       "urlFilter": "info.quizrent.com",
-      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "xmlhttprequest"
+      ]
     }
   },
   {
@@ -91,7 +107,11 @@
     },
     "condition": {
       "urlFilter": "xdabo.com",
-      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "xmlhttprequest"
+      ]
     }
   },
   {
@@ -109,7 +129,33 @@
     },
     "condition": {
       "urlFilter": "linkjust.com",
-      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "xmlhttprequest"
+      ]
+    }
+  },
+  {
+    "id": 7,
+    "priority": 7,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "referer",
+          "operation": "set",
+          "value": "https://loanbixby.com"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "srnky.com",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "xmlhttprequest"
+      ]
     }
   }
 ]
