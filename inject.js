@@ -10,7 +10,49 @@
 
   let url1 = null;
   let url2 = "https://loanbixby.com";
-  let url3 = "https://srnky.com/links/go";
+  let url3 = null;
+
+
+  // ============================================================
+  // PROXY FETCH
+  // ============================================================
+
+  function proxyFetch(url, options = {}) {
+    return new Promise((resolve, reject) => {
+      const requestId = Math.random().toString(36).substring(2, 15);
+
+      const listener = (event) => {
+        if (event.source !== window) return;
+        const message = event.data;
+
+        if (message && message.type === "PAGE_PROXY_FETCH_RESULT" && message.requestId === requestId) {
+          window.removeEventListener("message", listener);
+
+          if (message.response && message.response.success) {
+            resolve({
+              ok: message.response.status >= 200 && message.response.status < 300,
+              status: message.response.status,
+              statusText: message.response.statusText,
+              headers: message.response.headers,
+              text: () => Promise.resolve(message.response.body),
+              json: () => Promise.resolve(JSON.parse(message.response.body))
+            });
+          } else {
+            reject(new Error(message.response ? message.response.error : "Unknown proxy fetch error"));
+          }
+        }
+      };
+
+      window.addEventListener("message", listener);
+
+      window.postMessage({
+        type: "PAGE_PROXY_FETCH",
+        url,
+        options,
+        requestId
+      }, "*");
+    });
+  }
 
 
   // ============================================================
@@ -28,7 +70,7 @@
         return;
       }
 
-      let remaining = 15;
+      let remaining = 40;
 
       button.disabled = true;
       button.style.cursor = "not-allowed";
@@ -197,7 +239,7 @@
     console.log("GET:", url1);
 
     const getResponse =
-      await originalFetch(url1, {
+      await proxyFetch(url1, {
         method: "GET"
       });
 
@@ -235,16 +277,13 @@
     console.log("POST:", url1);
 
     const postResponse =
-      await originalFetch(url1, {
+      await proxyFetch(url1, {
 
         method: "POST",
 
         headers: {
           "Content-Type":
-            "application/x-www-form-urlencoded",
-
-          "Referer":
-            url2
+            "application/x-www-form-urlencoded; charset=UTF-8"
         },
 
         body:
@@ -328,7 +367,7 @@
 
 
     const finalResponse =
-      await originalFetch(
+      await proxyFetch(
         url3,
         {
 
@@ -483,13 +522,15 @@
         // data.shortener === url1
         // =================================================
 
-        if (data?.isFound === true && data?.shortenedShortener === "srnky.com") {
+        if (data?.isFound === true && (data?.shortenedShortener === "srnky.com" || data?.shortenedShortener === "clksz.com")) {
 
           console.log(
             "🎯 Target shortener detected"
           );
 
           url1 = data?.shortener;
+
+          url3 = new URL(url1).origin + "/links/go";
 
 
           // =============================================
