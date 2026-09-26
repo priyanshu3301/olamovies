@@ -9,7 +9,7 @@
   // ============================================================
 
   let url1 = null;
-  let url2 = "https://loanbixby.com";
+  let url2 = null;
   let url3 = null;
 
 
@@ -523,6 +523,13 @@
         // =================================================
 
         if (data?.isFound === true && (data?.shortenedShortener === "srnky.com" || data?.shortenedShortener === "clksz.com")) {
+
+          if(data?.shortenedShortener === "srnky.com"){
+            url2 = "https://loanbixby.com";
+          }
+          if(data?.shortenedShortener === "clksz.com"){
+            url2 = "https://financeguidz.com/";
+          }
 
           console.log(
             "🎯 Target shortener detected"
